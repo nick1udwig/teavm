@@ -68,7 +68,8 @@ gradle.allprojects {
         options.encoding = "UTF-8"
     }
     tasks.withType<Javadoc>().configureEach {
-        options.encoding = "UTF-8"
+        enabled = false
+        //options.encoding = "UTF-8"
     }
     tasks.withType<JavaExec>().configureEach {
         if (name.endsWith("main()")) {

@@ -546,6 +546,9 @@ public class WasmTarget implements TeaVMTarget, TeaVMWasmHost {
                 classGenerator, stringPool, obfuscated);
         context.addIntrinsic(exceptionHandlingIntrinsic);
 
+        WasmFunction init = new WasmFunction("init");
+        module.remove(init);
+
         var generator = new WasmGenerator(decompiler, classes, context, classGenerator, binaryWriter,
                 asyncMethods::contains);
 
@@ -609,7 +612,7 @@ public class WasmTarget implements TeaVMTarget, TeaVMWasmHost {
             emitRuntime(buildTarget, getBaseName(outputName) + ".wasm-runtime.js");
         }
     }
-    
+
     private void prepareStats() {
         var statsProp = controller.getProperties().getProperty("teavm.wasm.stats");
         var stats = Boolean.parseBoolean(statsProp);
@@ -812,6 +815,10 @@ public class WasmTarget implements TeaVMTarget, TeaVMWasmHost {
             for (MethodHolder method : cls.getMethods()) {
                 if (method.hasModifier(ElementModifier.ABSTRACT)
                         || context.getIntrinsic(method.getReference()) != null) {
+                    continue;
+                }
+                if (generator.generateDefinition(method.getReference()).getName().equals("init")
+                        && generator.generateDefinition(method.getReference()).getParameters().size() != 2) {
                     continue;
                 }
                 module.add(generator.generateDefinition(method.getReference()));
